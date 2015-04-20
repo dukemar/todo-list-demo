@@ -3,11 +3,11 @@
 one:
   name: MyString
   description: MyText
-  due_date: 2015-02-09
+  due_date: 2015-06-09
   category_id: 1
 
 two:
-  name: MyString
-  description: MyText
-  due_date: 2015-02-09
-  category_id: 1
+  name: Farming
+  description: growing food
+  due_date: 2016-02-09
+  category_id: 2

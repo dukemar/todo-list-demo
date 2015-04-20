@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   resources :categories
   resources :tasks
   resources :users
+  resources :account_activations, only: [:edit]
   
   root 'welcome#index'
   get 'about_us'         => 'welcome#about_us'
