@@ -1,10 +1,13 @@
 Rails.application.routes.draw do
   get 'sessions/new'
 
-  resources :categories
+  resources :users do
   resources :tasks
-  resources :users
+  end
   resources :account_activations, only: [:edit]
+  resources :categories
+  resources :tasks, only: [:index, :show]
+  
   
   root 'welcome#index'
   get 'about_us'         => 'welcome#about_us'

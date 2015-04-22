@@ -1,8 +1,9 @@
 include SessionsHelper
 
 class TasksController < ApplicationController
-  before_action :logged_in_user, only: [:show, :edit, :update, :destroy]
- # before_action :set_task, only: [:show, :edit, :update, :destroy]
+  before_action :logged_in_user
+  before_action :set_task, only: [:show, :edit, :update, :destroy]
+  before_action :owns_task, only: [:update, :destroy]
 
   # GET /tasks
   # GET /tasks.json
@@ -17,7 +18,7 @@ class TasksController < ApplicationController
 
   # GET /tasks/new
   def new
-    @task = Task.new
+    @task = current_user.tasks.new
   end
 
   # GET /tasks/1/edit
@@ -27,8 +28,7 @@ class TasksController < ApplicationController
   # POST /tasks
   # POST /tasks.json
   def create
-    @task = Task.new(task_params)
-
+    @task = current_user.tasks.new(task_params)
     respond_to do |format|
       if @task.save
         format.html { redirect_to @task, notice: 'Task was successfully created.' }
@@ -44,14 +44,14 @@ class TasksController < ApplicationController
   # PATCH/PUT /tasks/1.json
   def update
     respond_to do |format|
-      if @task.update(task_params)
-        format.html { redirect_to @task, notice: 'Task was successfully updated.' }
-        format.json { render :show, status: :ok, location: @task }
-      else
-        format.html { render :edit }
-        format.json { render json: @task.errors, status: :unprocessable_entity }
-      end
-    end
+        if @task.update(task_params)
+          format.html { redirect_to @task, notice: 'Task was successfully updated.' }
+          format.json { render :show, status: :ok, location: @task }
+        else
+          format.html { render :edit }
+          format.json { render json: @task.errors, status: :unprocessable_entity }
+        end
+     end
   end
 
   # DELETE /tasks/1
@@ -65,21 +65,34 @@ class TasksController < ApplicationController
   end
 
   private
+  
+  def owns_task
+    if @task.user_id != current_user.id
+      flash[:danger] = 'You are not authorized to do this'
+      redirect_to root_url
+   end
+ end
+  
     # Use callbacks to share common setup or constraints between actions.
     def set_task
-      @task = Task.find(params[:id])
+      if params[:user_id]
+       @task = current_user.tasks.find(params[:id])
+      else
+        @task = Task.find(params[:id])
+      end    
     end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
     def task_params
       params.require(:task).permit(:name, :description, :due_date, :category_id)
     end
+
+    # Never trust parameters from the scary internet, only allow the white list through.
   
     # Confirms a logged-in user.
     def logged_in_user
       unless logged_in?
         flash[:danger] = "Please log in."
         redirect_to login_url
-    end
-  end
+      end
+   end
 end
